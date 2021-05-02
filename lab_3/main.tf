@@ -1,3 +1,8 @@
+
+provider "aws" {
+  region  = "eu-west-2"
+}
+
 resource "aws_s3_bucket" "website" {
   bucket = "playground-${var.my_panda}.devopsplayground.org"
   acl    = "public-read"
@@ -194,4 +199,43 @@ resource "aws_api_gateway_integration_response" "options_integration_item_respon
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
   depends_on = [aws_api_gateway_method_response.options_200_item]
+}
+
+resource "aws_dynamodb_table" "users" {
+  name             = "playground-${var.my_panda}"
+  hash_key         = "users"
+  billing_mode     = "PAY_PER_REQUEST"
+  stream_enabled   = false
+  attribute {
+    name = "users"
+    type = "S"
+  }
+  tags = {
+    Owner = "playground-${var.my_panda}"
+  }
+}
+
+resource "aws_iam_policy" "dynamodb" {
+  name        = "playground-${var.my_panda}"
+  path        = "/"
+  description = "DynamoDB policy for lambda"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "dynamodb:*",
+        ]
+        Effect   = "Allow"
+        Resource = "${aws_dynamodb_table.users.arn}"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "lambda" {
+  name = "dynamodb-to-lambda"
+  roles = [aws_iam_role.lambda_role.name]
+  policy_arn = aws_iam_policy.dynamodb.arn
 }
