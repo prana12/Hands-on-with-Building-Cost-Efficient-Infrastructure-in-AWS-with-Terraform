@@ -9,3 +9,5 @@ We will have work with the requirements from our crazy product team and our sess
 - [Adding Database layer](lab_3/README.md)
 
 I hope that this session will show that using cloud can be easy and cost effective.
+
+## YOUTUBE link: https://www.youtube.com/watch?v=nSemXbd8TQk
